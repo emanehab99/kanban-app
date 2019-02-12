@@ -1,53 +1,20 @@
-import React from 'react'
-import uuid from 'uuid'
+import React from 'react';
+import uuid from 'uuid';
 
-import Notes from './Notes'
+import Notes from './Notes';
 
-// export default () => <Notes />; //include Notes directly into App
+import connect from '../libs/connect';
+
+import NoteActions from '../actions/NoteActions';
 
 
-// const notes = [
-//     {
-//         id: uuid.v4(),
-//         task: 'Learn React'
-//     },
-//     {
-//         id: uuid.v4(),
-//         task: 'Do laundry'
-//     }
-// ];
-
-// export default () => (
-//     <div>
-//         <button onClick={() => console.log('add note')}>+</button>
-//         <Notes notes={notes} />
-//     </div>
-// );
-
-export default class App extends React.Component {
-    constructor(props){
-        super(props);
-
-        this.state = {
-            notes:[
-                {
-                    id: uuid.v4(),
-                    task: 'Learn React'
-                },
-                {
-                    id: uuid.v4(),
-                    task: 'Do laundry'
-                }
-            ]
-        };
-    }
+class App extends React.Component {
 
     render(){
-        const {notes} = this.state;
+        const {notes} = this.props;
 
         return (
             <div>
-                {/*<button onClick={() => console.log('add note')}>+</button>*/}
                 <button className="add-note" onClick={this.addNote}>+</button>
                 <Notes
                     notes={notes}
@@ -60,18 +27,14 @@ export default class App extends React.Component {
     }
 
     addNote = () => {
-        // One way to do it
-        // this.setState({
-        //     notes: this.state.notes.concat([{
-        //         id: uuid.v4(),
-        //         task: 'New Task'
-        //         }]
-        //     )
-        // });
-
         // And another way to do it
-        this.setState({notes:[...this.state.notes, {id: uuid.v4(), task:'New Task'}]});
-    }
+        // this.setState({notes:[...this.state.notes, {id: uuid.v4(), task:'New Task'}]});
+        this.props.NoteActions.create([{
+                id: uuid.v4(),
+                task: 'New task'
+            }]
+        )
+    };
 
     deleteNote = (id, e) => {
 
@@ -83,27 +46,16 @@ export default class App extends React.Component {
     }
 
     activateNoteEdit = (id) => {
-        this.setState({
-            notes: this.state.notes.map(note => {
-                if(note.id === id){
-                    note.editing = true;
-                }
-                return note;
-            })
-        });
+        this.props.NoteActions.update({id, editing: true});
     }
 
     editNote = (id, task) => {
-        this.setState({
-            notes: this.state.notes.map(note => {
-                if(note.id === id){
-                    note.editing = false;
-                    note.task = task;
-                }
-                return note;
-            })
-        });
+       this.props.NoteActions.update({id, task, editing: false});
     }
 
-
 }
+export default connect(({notes}) => ({
+    notes
+}), {
+    NoteActions
+})(App)
